@@ -139,7 +139,7 @@ public class Model {
 		
 		IUserDAO dao = DAOFactory.getDAO();			
 		
-		if ( dao.checkIfContactNameExists( contactBean.getName() ) ) {
+		if ( dao.checkIfContactNameExists( contactBean.getName() , null ) ) {
 			
 			return "Your contact name already exists...";
 			
@@ -242,6 +242,98 @@ public class Model {
 		return beanList;
 		
 		
+	}
+	
+	public String updateContact(ContactBean contactBean) {
+		 
+		System.out.println("In model -> updateContact() -> contactBean = " +contactBean);
+		
+		// perform user input validations
+		
+		String msg = contactBean.validate();
+		
+		if( !msg.equals( Constants.SUCCESS ) ) {
+			
+			System.out.println("Model -> addContact() , addContact has failed! msg = " +msg);
+			return msg;
+			
+		}
+		
+		//perform business validations
+		
+		// check unique name
+		
+		IUserDAO dao = DAOFactory.getDAO();			
+		
+		if ( dao.checkIfContactNameExists( contactBean.getName() , contactBean.getSl_no())) {
+			
+			return "Your contact name already exists...";
+			
+		} 
+		
+		//check unique email
+		
+		String emails = contactBean.getEmail();
+		
+		String[] arr = emails.split(",");
+		int count = 0;
+		
+		for( int i = 0 ; i < arr.length; i++ ) {
+			
+			for( int j = i+1 ; j < arr.length; j++ ) {
+				
+				if( arr[i].equals(arr[j]) ) {
+					
+					count++;
+					
+				}
+			}
+		}
+		
+		if( count > 0 ) {
+			
+			//contains duplicate email
+			return "Enter unique email ids";
+		}
+		
+		//check unique phoneNumber
+			
+		String phoneNumbers = contactBean.getPhoneNum();
+		
+		String[] phNumArr = phoneNumbers.split(",");
+		int count1 = 0;
+		
+		for( int i = 0 ; i < phNumArr.length; i++ ) {
+			
+			for( int j = i+1 ; j < phNumArr.length; j++ ) {
+				
+				if( phNumArr[i].equals(phNumArr[j]) ) {
+					
+					System.out.println(phNumArr[i]+" "+phNumArr[j]);
+					count1++;
+					
+				}
+			}
+		}
+		if( count1 > 0 ) {
+				
+			//contains duplicate phoneNumbers
+			return "Enter unique phone numbers";
+		}
+		
+		//update contacts
+		IUserDAO dao1 = DAOFactory.getDAO();
+		String message = dao1.updateContact(contactBean);
+		
+		if( message.equals( Constants.SUCCESS ) ) {
+			
+			return Constants.SUCCESS;
+			
+		} else {
+			
+			return message;
+			
+		}
 	}
 
 }

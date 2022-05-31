@@ -280,7 +280,7 @@ public class HSQLDbDAO implements IUserDAO {
 		}
 	}
 
-	public boolean checkIfContactNameExists(String name) {
+	public boolean checkIfContactNameExists(String name , Integer sl_no) {
 
 		Connection con = null;
 		PreparedStatement ps_sel = null;
@@ -289,10 +289,21 @@ public class HSQLDbDAO implements IUserDAO {
 		try {
 
 			con = JDBCHelper.getConnection();
-
-			ps_sel = con.prepareStatement("select * from contact where name = ?");
-			ps_sel.setString(1, name);
-			ps_sel.execute();
+			
+			if( sl_no == null  ) {
+				
+				ps_sel = con.prepareStatement("select * from contact where name = ?");
+				ps_sel.setString(1, name);
+				ps_sel.execute();
+				
+			} else {
+				
+				ps_sel = con.prepareStatement("select * from contact where name = ? and sl_no <> ?");
+				ps_sel.setString(1, name);
+				ps_sel.setLong(2, sl_no);
+				ps_sel.execute();
+				
+			}
 
 			rs = ps_sel.getResultSet();
 
@@ -458,112 +469,83 @@ public class HSQLDbDAO implements IUserDAO {
 
 	}
 
-//	public List<ContactBean> getContacts() {
-//
-//		Connection con = null;
-//
-//		PreparedStatement ps_sel = null, ps_emailsSel = null, ps_tagsSel = null, ps_phNumsSel = null;
-//
-//		ResultSet rsSel = null, rsEmailsSel = null, rsTagsSel = null, rsPhNumsSel = null;
-//
-//		List<ContactBean> al = new ArrayList<ContactBean>();
-//
-//		try {
-//
-//			con = JDBCHelper.getConnection();
-//
-//			ps_sel = con.prepareStatement("select * from contact");
-//			ps_sel.execute();
-//
-//			rsSel = ps_sel.getResultSet();
-//
-//			String name, dob, gender, created_date;
-//			int sl_no;
-//
-//			while (rsSel.next()) {
-//
-//				sl_no = rsSel.getInt("sl_no");
-//				name = rsSel.getString("name");
-//				dob = rsSel.getString("dob");
-//				gender = rsSel.getString("gender");
-//				created_date = rsSel.getString("created_date");
-//
-//				System.out.println("sl_no = " + sl_no + " name = " + name + " dob = " + dob + " gender = " + gender
-//						+ " created_date = " + created_date);
-//
-//				ps_emailsSel = con.prepareStatement("select email from contact_emails where contact_sl = ?");
-//				ps_emailsSel.setInt(1, sl_no);
-//				ps_emailsSel.execute();
-//
-//				rsEmailsSel = ps_emailsSel.getResultSet();
-//				String emails = "", tempEmail;
-//
-//				while (rsEmailsSel.next()) {
-//
-//					tempEmail = rsEmailsSel.getString("email");
-//					emails = emails + tempEmail + ",";
-//				}
-//
-//				emails = emails.substring(0, emails.length() - 1);
-//				System.out.println("emails = " + emails);
-//
-//				ps_tagsSel = con.prepareStatement("select tag from contact_tags where contact_sl = ?");
-//				ps_tagsSel.setInt(1, sl_no);
-//				ps_tagsSel.execute();
-//
-//				rsTagsSel = ps_tagsSel.getResultSet();
-//				String tags = "", tempTag;
-//
-//				while (rsTagsSel.next()) {
-//
-//					tempTag = rsTagsSel.getString("tag");
-//					tags = tags + tempTag + ",";
-//				}
-//
-//				tags = tags.substring(0, tags.length() - 1);
-//				System.out.println("tags = " + tags);
-//
-//				ps_phNumsSel = con
-//						.prepareStatement("select phoneNumber from contact_phoneNumbers where contact_sl = ?");
-//				ps_phNumsSel.setInt(1, sl_no);
-//				ps_phNumsSel.execute();
-//
-//				rsPhNumsSel = ps_phNumsSel.getResultSet();
-//				String phNums = "", tempPhNum;
-//
-//				while (rsPhNumsSel.next()) {
-//
-//					tempPhNum = rsPhNumsSel.getString("phoneNumber");
-//					phNums = phNums + tempPhNum + ",";
-//				}
-//
-//				phNums = phNums.substring(0, phNums.length() - 1);
-//				System.out.println("phNums = " + phNums);
+	public String updateContact(ContactBean contactBean) {
+		
+		Connection con = null;
 
-				// private String name , email , phoneNum , tags , gender , dob , created_date;
-//				ContactBean cBean = new ContactBean(name, emails, phNums, tags, gender, dob, created_date);
-//				al.add(cBean);
-//
-//			}
-//
-//		} catch (Exception e) {
-//
-//			e.printStackTrace();
-//
-//		} finally {
-//
-//			JDBCHelper.close(con);
-//			JDBCHelper.close(ps_sel);
-//			JDBCHelper.close(ps_emailsSel);
-//			JDBCHelper.close(ps_tagsSel);
-//			JDBCHelper.close(ps_phNumsSel);
-//			JDBCHelper.close(rsSel);
-//			JDBCHelper.close(rsEmailsSel);
-//			JDBCHelper.close(rsTagsSel);
-//			JDBCHelper.close(ps_phNumsSel);
-//
-//		}
-//		return al;
-//	}
+		PreparedStatement ps_contactUpdate = null , ps_contactEmailsUpdate = null , ps_contactTagsUpdate = null , ps_contactPhoneNumsUpdate = null;
 
+		try {
+			
+			con = JDBCHelper.getConnection();
+			
+			ps_contactUpdate = con.prepareStatement("update contact set name = ? , dob = ? , gender = ? where sl_no = ?");
+			
+			ps_contactUpdate.setString(1, contactBean.getName());
+			ps_contactUpdate.setString(2, contactBean.getDob());
+			ps_contactUpdate.setString(3, contactBean.getGender());
+			ps_contactUpdate.setLong(4, contactBean.getSl_no());
+			ps_contactUpdate.execute();
+
+			String emails = contactBean.getEmail();
+			String[] emailArr = emails.split(",");
+			int i = 0;
+
+			while (i < emailArr.length) {
+
+				ps_contactEmailsUpdate = con.prepareStatement("update contact_emails set email = ? where  contact_sl = ?");
+
+				ps_contactEmailsUpdate.setString(1, emailArr[i]);
+				ps_contactEmailsUpdate.setLong(2, contactBean.getSl_no());
+				ps_contactEmailsUpdate.execute();
+				i++;
+			}
+
+			String tags = contactBean.getTags();
+			String[] tagsArr = tags.split(",");
+			int j = 0;
+
+			while (j < tagsArr.length) {
+
+				ps_contactTagsUpdate = con.prepareStatement("update contact_tags set tag = ? where  contact_sl = ?");
+
+				ps_contactTagsUpdate.setString(1, tagsArr[j]);
+				ps_contactTagsUpdate.setLong(2, contactBean.getSl_no());
+				ps_contactTagsUpdate.execute();
+				j++;
+
+			}
+
+			String phoneNum = contactBean.getPhoneNum();
+			String[] phoneNumArr = phoneNum.split(",");
+			int k = 0;
+
+			while (k < phoneNumArr.length) {
+
+				ps_contactPhoneNumsUpdate = con.prepareStatement("update contact_phoneNumbers set phonenumber = ? where  contact_sl = ?");
+
+				ps_contactPhoneNumsUpdate.setString(1, phoneNumArr[k]);
+				ps_contactPhoneNumsUpdate.setLong(2, contactBean.getSl_no());
+				ps_contactPhoneNumsUpdate.execute();
+				k++;
+
+			}
+
+			return Constants.SUCCESS;
+			
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+			return "Oops something bad happened , msg = " + e.getMessage();
+
+		} finally {
+
+			JDBCHelper.close(con);
+			JDBCHelper.close(ps_contactUpdate);
+			JDBCHelper.close(ps_contactEmailsUpdate);
+			JDBCHelper.close(ps_contactTagsUpdate);
+			JDBCHelper.close(ps_contactPhoneNumsUpdate);
+			
+		}
+	}
 }

@@ -9,7 +9,8 @@ public interface IUserDAO {
 	public String authenticate( LoginBean bean );
 	public String saveEditAccounntDetails(RegBean regBean);
 	public String addContact(ContactBean contactBean);
-	public boolean checkIfContactNameExists(String name);
+	public boolean checkIfContactNameExists(String name , Integer sl_no);
 	public List<ContactBean> getContacts(String searchString , int orderBy);
+	public String updateContact(ContactBean contactBean);
 	
 }

@@ -38,8 +38,16 @@
 	    		<td><c:out value="${contact.dob}" /></td>
 	    		<td><c:out value="${contact.created_date}" /></td>
 	    		<td>
-            		<form action="updateContact.do" method="post">
+            		<form action="edit.do" method="post">
                 		<input type="hidden" name="sl_no" value="${contact.sl_no}" />
+                		<input type="hidden" name="name" value="${contact.name}" />
+                		<input type="hidden" name="email" value="${contact.email}" />
+                		<input type="hidden" name="phoneNum" value="${contact.phoneNum}" />
+                		<input type="hidden" name="tags" value="${contact.tags}" />
+                		<input type="hidden" name="gender" value="${contact.gender}" />
+                		<input type="hidden" name="dob" value="${contact.dob}" />
+                		<input type="hidden" name="created_date" value="${contact.created_date}" />
+                		
                		 	<input type="submit"  value="edit">
             		</form>
             	</td>

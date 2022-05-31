@@ -298,31 +298,71 @@ public class ControllerServlet extends HttpServlet {
 			
 		}
 		
-		if( uri.contains( "/updateContact.do" ) ) {
+		if( uri.contains( "/edit.do" ) ) {
 			
-			System.out.println("in uri.contains(/updateContact.do)");
+			System.out.println("in uri.contains(/edit.do)");
 			//forward to UpdateContact.jsp 
 			
 			String no = request.getParameter("sl_no");
 			int sl_no = Integer.parseInt(no);
+			String name = request.getParameter("name");
+			String email = request.getParameter("email");
+			String phoneNum = request.getParameter("phoneNum");
+			String tags = request.getParameter("tags");
+			String gender = request.getParameter("gender");
+			String dob = request.getParameter("dob");
+			String created_date = request.getParameter("created_date");
 			
-			System.out.println("sl_no = " +sl_no);
-			request.setAttribute("sl_no", sl_no);
+			if(gender.equals("M")) {
+				 request.setAttribute("isMChecked", "checked");
+			 }
+			 
+			 if( gender.equals("F")) {
+				 request.setAttribute("isFChecked", "checked");
+			 }
+			
+			ContactBean contactBean = new ContactBean(sl_no , name , email , phoneNum , tags , gender , dob , created_date);
+			
+			System.out.println("sl_no = " +sl_no+ " name = " +name+ " email = " +email+ " phoneNum = " +phoneNum+" tags = " +tags+
+					" gender =  "+gender+ " dob = " +dob+ " created_date = " +created_date);
+			request.setAttribute("contactBean", contactBean);
+			
 			rd = request.getRequestDispatcher( "UpdateContact.jsp" );
 			rd.forward(request, response);
 		}
 
-if( uri.contains( "/openEditContactView.do" ) ) {
-	
-	System.out.println("in uri.contains(/openEditContactView.do)");
-	//forward to EditContact.jsp 
-	
-	rd = request.getRequestDispatcher( "EditContact.jsp" );
-	rd.forward(request, response);
-}
-		System.out.println("");
-		System.out.println("");
 		
+	
+	if( uri.contains( "/updateContact.do" ) ) {
+		
+		System.out.println("in uri.contains(/updateContact.do)");
+		
+		ContactBean contactBean = (ContactBean)request.getAttribute("updateContact");
+		String message2 = model.updateContact(contactBean);
+		
+		if( message2.equals(Constants.SUCCESS) ) {
+			 
+			 String successMsg = "Your contact updated successfully!";
+			 request.setAttribute("sMessage", successMsg);
+			 
+			 rd = request.getRequestDispatcher("Success.jsp");
+			 rd.forward(request, response);
+			 
+		 } else {
+			 request.setAttribute("errorMsg", message2);
+			 
+			 rd = request.getRequestDispatcher("UpdateContact.jsp");
+			 rd.forward(request, response);
+			 
+		 }
+	}
+	
+	if( uri.contains( "/deleteContact.do" ) ) {
+		
+		System.out.println("in uri.contains(/updateContact.do)");
+	}
+	System.out.println("");
+	System.out.println("");
 	}
 	
 }
