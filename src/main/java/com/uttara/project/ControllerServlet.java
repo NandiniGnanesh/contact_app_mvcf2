@@ -297,6 +297,29 @@ public class ControllerServlet extends HttpServlet {
 			rd.forward(request, response);
 			
 		}
+		
+		if( uri.contains( "/updateContact.do" ) ) {
+			
+			System.out.println("in uri.contains(/updateContact.do)");
+			//forward to UpdateContact.jsp 
+			
+			String no = request.getParameter("sl_no");
+			int sl_no = Integer.parseInt(no);
+			
+			System.out.println("sl_no = " +sl_no);
+			request.setAttribute("sl_no", sl_no);
+			rd = request.getRequestDispatcher( "UpdateContact.jsp" );
+			rd.forward(request, response);
+		}
+
+if( uri.contains( "/openEditContactView.do" ) ) {
+	
+	System.out.println("in uri.contains(/openEditContactView.do)");
+	//forward to EditContact.jsp 
+	
+	rd = request.getRequestDispatcher( "EditContact.jsp" );
+	rd.forward(request, response);
+}
 		System.out.println("");
 		System.out.println("");
 		
