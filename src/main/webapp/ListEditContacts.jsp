@@ -13,6 +13,7 @@
      <caption><h2>List of contacts to edit</h2></caption>
             <thead>
             <tr>
+                 <th scope="col">sl_no</th>
                  <th scope="col">name</th>
                  <th scope="col">email</th>
                  <th scope="col">phoneNum</th>
@@ -25,7 +26,8 @@
    				<c:forEach items="${editBeanList}" var="contact">
    			<tbody>
    				<tr>
-   				<td scope="row""><c:out value="${contact.name}" /></td>
+   				<td scope="row""><c:out value="${contact.sl_no}" /></td>
+   				<td><c:out value="${contact.name}" /></td>
    				<td><c:out value="${contact.email}" /></td>
 	    		<td><c:out value="${contact.phoneNum}" /></td>
 	   			<td><c:out value="${contact.tags}" /></td>

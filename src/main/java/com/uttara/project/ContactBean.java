@@ -7,6 +7,7 @@ public class ContactBean implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	private String name , email , phoneNum , tags , gender , dob , created_date;
+	int sl_no;
 	
 	public ContactBean() {
 		
@@ -14,9 +15,10 @@ public class ContactBean implements Serializable{
 	
 	}
 	
-	public ContactBean(String name, String email, String phoneNum, String tags, String gender, String dob, String created_date) {
+	public ContactBean(int sl_no , String name, String email, String phoneNum, String tags, String gender, String dob, String created_date) {
 		
 		super();
+		this.sl_no = sl_no; 
 		this.name = name;
 		this.email = email;
 		this.phoneNum = phoneNum;
@@ -25,6 +27,14 @@ public class ContactBean implements Serializable{
 		this.dob = dob;
 		this.created_date = created_date;
 		
+	}
+
+	public int getSl_no() {
+		return sl_no;
+	}
+
+	public void setSl_no(int sl_no) {
+		this.sl_no = sl_no;
 	}
 
 	public String getName() {
@@ -96,6 +106,8 @@ public class ContactBean implements Serializable{
 		this.created_date = created_date;
 	}
 
+	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -106,6 +118,7 @@ public class ContactBean implements Serializable{
 		result = prime * result + ((gender == null) ? 0 : gender.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((phoneNum == null) ? 0 : phoneNum.hashCode());
+		result = prime * result + sl_no;
 		result = prime * result + ((tags == null) ? 0 : tags.hashCode());
 		return result;
 	}
@@ -149,6 +162,8 @@ public class ContactBean implements Serializable{
 				return false;
 		} else if (!phoneNum.equals(other.phoneNum))
 			return false;
+		if (sl_no != other.sl_no)
+			return false;
 		if (tags == null) {
 			if (other.tags != null)
 				return false;
@@ -160,7 +175,7 @@ public class ContactBean implements Serializable{
 	@Override
 	public String toString() {
 		return "ContactBean [name=" + name + ", email=" + email + ", phoneNum=" + phoneNum + ", tags=" + tags
-				+ ", gender=" + gender + ", dob=" + dob + ", created_date=" + created_date + "]";
+				+ ", gender=" + gender + ", dob=" + dob + ", created_date=" + created_date + ", sl_no=" + sl_no + "]";
 	}
 
 	public String validate() {
