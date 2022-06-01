@@ -381,12 +381,25 @@ public class ControllerServlet extends HttpServlet {
 			 
 		 }
 	}
+	
+	if( uri.contains( "/openBirthdayRemainderView.do" ) ) {
+		
+		System.out.println("in uri.contains(/openBirthdayRemainderView.do)");
+		
+		List<ContactBean> beanList = model.birthdayRemainders();
+		
+		//forward to BirthdayRemainders.jsp
+		request.setAttribute("list", beanList);
+		
+		rd = request.getRequestDispatcher( "BirthdayRemainders.jsp" );
+		rd.forward(request, response);
+	}
+	
 	System.out.println("");
 	System.out.println("");
 	}
 	
 }
-
 
 
 

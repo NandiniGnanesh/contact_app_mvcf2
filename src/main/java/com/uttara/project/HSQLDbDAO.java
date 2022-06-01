@@ -441,7 +441,6 @@ public class HSQLDbDAO implements IUserDAO {
 				phNums = phNums.substring(0, phNums.length() - 1);
 				System.out.println("phNums = " + phNums);
 
-				// private String name , email , phoneNum , tags , gender , dob , created_date;
 				ContactBean cBean = new ContactBean(sl_no , name, emails, phNums, tags, gender, dob, created_date);
 				al.add(cBean);
 
@@ -589,5 +588,109 @@ public class HSQLDbDAO implements IUserDAO {
 			JDBCHelper.close(ps_contactPhoneNumsDelete);
 			
 		}
+	}
+
+	public List<ContactBean> birthdayRemainders() {
+		
+		PreparedStatement ps_sel = null , ps_emailsSel = null , ps_tagsSel = null , ps_phNumsSel = null;
+		Connection con = null;
+		
+		ResultSet rsSel = null , rsEmailsSel = null , rsTagsSel = null , rsPhNumsSel = null;
+		List<ContactBean> al = new ArrayList<ContactBean>();
+		
+		try {
+			
+			int sl_no;
+			String name , dob , gender , created_date;
+			
+			con = JDBCHelper.getConnection();
+			ps_sel = con.prepareStatement("SELECT * FROM CONTACT WHERE DAYOFMONTH(dob) = DAYOFMONTH(CURRENT_DATE) AND MONTH(dob) = MONTH(CURRENT_DATE)");
+			
+			ps_sel.execute();
+			
+			rsSel = ps_sel.getResultSet();
+			
+			while( rsSel.next() ) {
+				
+				sl_no = rsSel.getInt("sl_no");
+				name = rsSel.getString("name");
+				dob = rsSel.getString("dob");
+				gender = rsSel.getString("gender");
+				created_date = rsSel.getString("created_date");
+
+				System.out.println("sl_no = " + sl_no + " name = " + name + " dob = " + dob + " gender = " + gender
+						+ " created_date = " + created_date);
+
+				ps_emailsSel = con.prepareStatement("select email from contact_emails where contact_sl = ?");
+				ps_emailsSel.setInt(1, sl_no);
+				ps_emailsSel.execute();
+
+				rsEmailsSel = ps_emailsSel.getResultSet();
+				String emails = "", tempEmail;
+
+				while (rsEmailsSel.next()) {
+
+					tempEmail = rsEmailsSel.getString("email");
+					emails = emails + tempEmail + ",";
+				}
+
+				emails = emails.substring(0, emails.length() - 1);
+				System.out.println("emails = " + emails);
+
+				ps_tagsSel = con.prepareStatement("select tag from contact_tags where contact_sl = ?");
+				ps_tagsSel.setInt(1, sl_no);
+				ps_tagsSel.execute();
+
+				rsTagsSel = ps_tagsSel.getResultSet();
+				String tags = "", tempTag;
+
+				while (rsTagsSel.next()) {
+
+					tempTag = rsTagsSel.getString("tag");
+					tags = tags + tempTag + ",";
+				}
+
+				tags = tags.substring(0, tags.length() - 1);
+				System.out.println("tags = " + tags);
+
+				ps_phNumsSel = con.prepareStatement("select phoneNumber from contact_phoneNumbers where contact_sl = ?");
+				ps_phNumsSel.setInt(1, sl_no);
+				ps_phNumsSel.execute();
+
+				rsPhNumsSel = ps_phNumsSel.getResultSet();
+				String phNums = "", tempPhNum;
+
+				while (rsPhNumsSel.next()) {
+
+					tempPhNum = rsPhNumsSel.getString("phoneNumber");
+					phNums = phNums + tempPhNum + ",";
+				}
+
+				phNums = phNums.substring(0, phNums.length() - 1);
+				System.out.println("phNums = " + phNums);
+
+				ContactBean cBean = new ContactBean(sl_no , name, emails, phNums, tags, gender, dob, created_date);
+				al.add(cBean);
+
+			}
+			
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+	
+		} finally {
+
+			JDBCHelper.close(con);
+			JDBCHelper.close(ps_sel);
+			JDBCHelper.close(ps_emailsSel);
+			JDBCHelper.close(ps_tagsSel);
+			JDBCHelper.close(ps_phNumsSel);
+			JDBCHelper.close(rsSel);
+			JDBCHelper.close(rsEmailsSel);
+			JDBCHelper.close(rsTagsSel);
+			JDBCHelper.close(ps_phNumsSel);
+
+		}
+		return al;
 	}
 }

@@ -352,4 +352,14 @@ public class Model {
 		}
 	}
 
+	public List<ContactBean> birthdayRemainders() {
+		
+		IUserDAO dao = DAOFactory.getDAO();
+		List<ContactBean> beanList = dao.birthdayRemainders();
+		
+		System.out.println("beanList = " +beanList);
+		return beanList;
+		
+	}
+
 }
