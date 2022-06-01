@@ -336,4 +336,20 @@ public class Model {
 		}
 	}
 
+	public String deleteContact(int sl_no) {
+		
+		IUserDAO dao = DAOFactory.getDAO();
+		String message = dao.deleteContact(sl_no);
+		
+		if( message.equals( Constants.SUCCESS ) ) {
+			
+			return Constants.SUCCESS;
+			
+		} else {
+			
+			return message;
+			
+		}
+	}
+
 }

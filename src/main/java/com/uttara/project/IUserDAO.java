@@ -12,5 +12,6 @@ public interface IUserDAO {
 	public boolean checkIfContactNameExists(String name , Integer sl_no);
 	public List<ContactBean> getContacts(String searchString , int orderBy);
 	public String updateContact(ContactBean contactBean);
+	public String deleteContact(int sl_no);
 	
 }

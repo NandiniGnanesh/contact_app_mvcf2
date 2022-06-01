@@ -548,4 +548,46 @@ public class HSQLDbDAO implements IUserDAO {
 			
 		}
 	}
+
+	public String deleteContact(int sl_no) {
+		
+		PreparedStatement ps_contactDelete = null , ps_contactEmailsDelete = null , ps_contactTagsDelete = null , ps_contactPhoneNumsDelete = null;
+		Connection con = null;
+		
+		try {
+			
+			con = JDBCHelper.getConnection();
+			ps_contactDelete = con.prepareStatement("delete from contact where sl_no = ?");
+			ps_contactDelete.setLong(1, sl_no);
+			ps_contactDelete.execute();
+			
+			ps_contactEmailsDelete = con.prepareStatement("delete from contact_emails where contact_sl = ?");
+			ps_contactEmailsDelete.setLong(1, sl_no);
+			ps_contactEmailsDelete.execute();
+			
+			ps_contactTagsDelete = con.prepareStatement("delete from contact_tags where contact_sl = ?");
+			ps_contactTagsDelete.setLong(1, sl_no);
+			ps_contactTagsDelete.execute();
+			
+			ps_contactPhoneNumsDelete = con.prepareStatement("delete from contact_phoneNumbers where contact_sl = ?");
+			ps_contactPhoneNumsDelete.setLong(1, sl_no);
+			ps_contactPhoneNumsDelete.execute();
+			
+			return Constants.SUCCESS;
+			
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+			return "Oops something bad happened , msg = " + e.getMessage();
+			
+		} finally {
+
+			JDBCHelper.close(con);
+			JDBCHelper.close(ps_contactDelete);
+			JDBCHelper.close(ps_contactEmailsDelete);
+			JDBCHelper.close(ps_contactTagsDelete);
+			JDBCHelper.close(ps_contactPhoneNumsDelete);
+			
+		}
+	}
 }

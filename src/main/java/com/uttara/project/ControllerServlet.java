@@ -359,7 +359,27 @@ public class ControllerServlet extends HttpServlet {
 	
 	if( uri.contains( "/deleteContact.do" ) ) {
 		
-		System.out.println("in uri.contains(/updateContact.do)");
+		System.out.println("in uri.contains(/deleteContact.do)");
+		
+		String no = request.getParameter("sl_no");
+		int sl_no = Integer.parseInt(no);
+		String msg = model.deleteContact(sl_no);
+		
+		if( msg.equals(Constants.SUCCESS) ) {
+			 
+			 String successMsg = "Your contact deleted successfully!";
+			 request.setAttribute("sMessage", successMsg);
+			 
+			 rd = request.getRequestDispatcher("Success.jsp");
+			 rd.forward(request, response);
+			 
+		 } else {
+			 request.setAttribute("errorMsg", msg);
+			 
+			 rd = request.getRequestDispatcher("UpdateContact.jsp");
+			 rd.forward(request, response);
+			 
+		 }
 	}
 	System.out.println("");
 	System.out.println("");
