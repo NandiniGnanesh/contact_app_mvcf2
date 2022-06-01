@@ -3,6 +3,7 @@ package com.uttara.project;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class HSQLDbDAO implements IUserDAO {
 		try {
 
 			con = JDBCHelper.getConnection();
+			
 			ps_ins = con.prepareStatement("insert into Register_users(name,email,password)values(?,?,?)");
 
 			ps_ins.setString(1, bean.getName());
@@ -33,7 +35,7 @@ public class HSQLDbDAO implements IUserDAO {
 			ps_ins.execute();
 
 			return Constants.SUCCESS;
-
+			
 		} catch (Exception e) {
 
 			e.printStackTrace();
@@ -55,7 +57,7 @@ public class HSQLDbDAO implements IUserDAO {
 		try {
 
 			con = JDBCHelper.getConnection();
-
+			
 			ps_sel = con.prepareStatement("select * from Register_users where email = ?");
 			ps_sel.setString(1, email);
 			ps_sel.execute();
@@ -91,7 +93,8 @@ public class HSQLDbDAO implements IUserDAO {
 		try {
 
 			con = JDBCHelper.getConnection();
-
+			con.setAutoCommit(false);
+			
 			ps_sel = con.prepareStatement("select * from Register_users where email = ? and password = ?");
 			ps_sel.setString(1, bean.getEmail());
 			ps_sel.setString(2, bean.getPwd());
@@ -125,6 +128,7 @@ public class HSQLDbDAO implements IUserDAO {
 
 			rs1 = ps_sel1.getResultSet();
 
+			con.commit();
 			if (rs1.next()) {
 
 				// there is at least 1 row...where only password matched
@@ -135,9 +139,14 @@ public class HSQLDbDAO implements IUserDAO {
 
 				return "Both email id and password is wrong . If you not yet registered. Please register before you login";
 			}
-
 		} catch (Exception e) {
-
+			
+			try {
+				con.rollback();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			e.printStackTrace();
 			return "Oops something bad happened , message = " + e.getMessage();
 
@@ -158,7 +167,7 @@ public class HSQLDbDAO implements IUserDAO {
 		try {
 
 			con = JDBCHelper.getConnection();
-
+			
 			ps_upd = con.prepareStatement(" update Register_users set name = ? , password = ? where email = ? ");
 			ps_upd.setString(1, regBean.getName());
 			ps_upd.setString(2, regBean.getPwd());
@@ -181,17 +190,16 @@ public class HSQLDbDAO implements IUserDAO {
 
 	public String addContact(ContactBean contactBean) {
 
-		PreparedStatement ps_contactIns = null, ps_contactEmailsIns = null, ps_contactTagsIns = null,
-				ps_contactPhoneNumsIns = null;
+		PreparedStatement ps_contactIns = null, ps_contactEmailsIns = null, ps_contactTagsIns = null, ps_contactPhoneNumsIns = null;
 		ResultSet rs = null;
 		Connection con = null;
 
 		try {
 
 			con = JDBCHelper.getConnection();
-
-			ps_contactIns = con.prepareStatement("insert into contact(name,dob,gender,created_date)values(?,?,?,?)",
-					Statement.RETURN_GENERATED_KEYS);
+			con.setAutoCommit(false);
+			
+			ps_contactIns = con.prepareStatement("insert into contact(name,dob,gender,created_date)values(?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
 			ps_contactIns.setString(1, contactBean.getName());
 			ps_contactIns.setString(2, contactBean.getDob());
@@ -261,10 +269,16 @@ public class HSQLDbDAO implements IUserDAO {
 				k++;
 
 			}
-
+			con.commit();
 			return Constants.SUCCESS;
+			
 		} catch (Exception e) {
 
+			try {
+				con.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 			e.printStackTrace();
 			return "Oops something bad happened , msg = " + e.getMessage();
 
@@ -313,7 +327,6 @@ public class HSQLDbDAO implements IUserDAO {
 				return true;
 			} else
 				return false;
-
 		} catch (Exception e) {
 
 			e.printStackTrace();
@@ -359,7 +372,8 @@ public class HSQLDbDAO implements IUserDAO {
 		try {
 
 			con = JDBCHelper.getConnection();
-		
+			con.setAutoCommit(false);
+			
 			if(searchString != null) {	
 				
 				s = "select * from contact where LOWER(name) like CONCAT( '%',?,'%')";	
@@ -446,9 +460,14 @@ public class HSQLDbDAO implements IUserDAO {
 
 			}
 
-		
+			con.commit();
 		}  catch (Exception e) {
-
+			
+			try {
+				con.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 			e.printStackTrace();
 
 		} finally {
@@ -472,11 +491,13 @@ public class HSQLDbDAO implements IUserDAO {
 		
 		Connection con = null;
 
-		PreparedStatement ps_contactUpdate = null , ps_contactEmailsUpdate = null , ps_contactTagsUpdate = null , ps_contactPhoneNumsUpdate = null;
+		PreparedStatement ps_contactUpdate = null , ps_contactEmailsIns = null , ps_contactTagsIns = null , ps_contactPhoneNumsIns = null ,
+				ps_contactEmailsDelete = null , ps_contactTagsDelete = null , ps_contactPhoneNumberDelete = null;
 
 		try {
 			
 			con = JDBCHelper.getConnection();
+			con.setAutoCommit(false);
 			
 			ps_contactUpdate = con.prepareStatement("update contact set name = ? , dob = ? , gender = ? where sl_no = ?");
 			
@@ -488,52 +509,75 @@ public class HSQLDbDAO implements IUserDAO {
 
 			String emails = contactBean.getEmail();
 			String[] emailArr = emails.split(",");
+			
 			int i = 0;
+			
+			ps_contactEmailsDelete = con.prepareStatement("delete from contact_emails where contact_sl = ?");
+			ps_contactEmailsDelete.setLong(1, contactBean.getSl_no());
+			ps_contactEmailsDelete.execute();
 
 			while (i < emailArr.length) {
+				
+				ps_contactEmailsIns = con.prepareStatement("insert into contact_emails(contact_sl,email)values(?,?)");
 
-				ps_contactEmailsUpdate = con.prepareStatement("update contact_emails set email = ? where  contact_sl = ?");
-
-				ps_contactEmailsUpdate.setString(1, emailArr[i]);
-				ps_contactEmailsUpdate.setLong(2, contactBean.getSl_no());
-				ps_contactEmailsUpdate.execute();
+				ps_contactEmailsIns.setInt(1, contactBean.getSl_no());
+				ps_contactEmailsIns.setString(2, emailArr[i]);
+				ps_contactEmailsIns.execute();
 				i++;
+				
 			}
 
 			String tags = contactBean.getTags();
 			String[] tagsArr = tags.split(",");
+			
+			ps_contactTagsDelete = con.prepareStatement("delete from contact_tags where contact_sl = ?");
+			ps_contactTagsDelete.setLong(1, contactBean.getSl_no());
+			ps_contactTagsDelete.execute();
+			
 			int j = 0;
 
 			while (j < tagsArr.length) {
 
-				ps_contactTagsUpdate = con.prepareStatement("update contact_tags set tag = ? where  contact_sl = ?");
+				ps_contactTagsIns = con.prepareStatement("insert into contact_tags(contact_sl,tag)values(?,?)");
 
-				ps_contactTagsUpdate.setString(1, tagsArr[j]);
-				ps_contactTagsUpdate.setLong(2, contactBean.getSl_no());
-				ps_contactTagsUpdate.execute();
+				ps_contactTagsIns.setLong(1, contactBean.getSl_no());
+				ps_contactTagsIns.setString(2, tagsArr[j]);
+				ps_contactTagsIns.execute();
 				j++;
 
 			}
 
 			String phoneNum = contactBean.getPhoneNum();
 			String[] phoneNumArr = phoneNum.split(",");
+			
+			ps_contactPhoneNumberDelete = con.prepareStatement("delete from contact_phoneNumbers where contact_sl = ?");
+			ps_contactPhoneNumberDelete.setLong(1, contactBean.getSl_no());
+			ps_contactPhoneNumberDelete.execute();
+			
+			
 			int k = 0;
 
 			while (k < phoneNumArr.length) {
 
-				ps_contactPhoneNumsUpdate = con.prepareStatement("update contact_phoneNumbers set phonenumber = ? where  contact_sl = ?");
+				ps_contactPhoneNumsIns = con.prepareStatement("insert into contact_phoneNumbers(contact_sl,phonenumber)values(?,?)");
 
-				ps_contactPhoneNumsUpdate.setString(1, phoneNumArr[k]);
-				ps_contactPhoneNumsUpdate.setLong(2, contactBean.getSl_no());
-				ps_contactPhoneNumsUpdate.execute();
+				ps_contactPhoneNumsIns.setLong(1, contactBean.getSl_no());
+				ps_contactPhoneNumsIns.setString(2, phoneNumArr[k]);
+				ps_contactPhoneNumsIns.execute();
 				k++;
 
 			}
-
+			
+			con.commit();
 			return Constants.SUCCESS;
 			
 		} catch (Exception e) {
 			
+			try {
+				con.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 			e.printStackTrace();
 			return "Oops something bad happened , msg = " + e.getMessage();
 
@@ -541,9 +585,12 @@ public class HSQLDbDAO implements IUserDAO {
 
 			JDBCHelper.close(con);
 			JDBCHelper.close(ps_contactUpdate);
-			JDBCHelper.close(ps_contactEmailsUpdate);
-			JDBCHelper.close(ps_contactTagsUpdate);
-			JDBCHelper.close(ps_contactPhoneNumsUpdate);
+			JDBCHelper.close(ps_contactEmailsIns);
+			JDBCHelper.close(ps_contactTagsIns);
+			JDBCHelper.close(ps_contactPhoneNumsIns);
+			JDBCHelper.close(ps_contactEmailsDelete);
+			JDBCHelper.close(ps_contactTagsDelete);
+			JDBCHelper.close(ps_contactPhoneNumberDelete);
 			
 		}
 	}
@@ -556,6 +603,8 @@ public class HSQLDbDAO implements IUserDAO {
 		try {
 			
 			con = JDBCHelper.getConnection();
+			con.setAutoCommit(false);
+			
 			ps_contactDelete = con.prepareStatement("delete from contact where sl_no = ?");
 			ps_contactDelete.setLong(1, sl_no);
 			ps_contactDelete.execute();
@@ -572,10 +621,16 @@ public class HSQLDbDAO implements IUserDAO {
 			ps_contactPhoneNumsDelete.setLong(1, sl_no);
 			ps_contactPhoneNumsDelete.execute();
 			
+			con.commit();
 			return Constants.SUCCESS;
 			
 		} catch (Exception e) {
 			
+			try {
+				con.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 			e.printStackTrace();
 			return "Oops something bad happened , msg = " + e.getMessage();
 			
@@ -604,6 +659,8 @@ public class HSQLDbDAO implements IUserDAO {
 			String name , dob , gender , created_date;
 			
 			con = JDBCHelper.getConnection();
+			con.setAutoCommit(false);
+			
 			ps_sel = con.prepareStatement("SELECT * FROM CONTACT WHERE DAYOFMONTH(dob) = DAYOFMONTH(CURRENT_DATE) AND MONTH(dob) = MONTH(CURRENT_DATE)");
 			
 			ps_sel.execute();
@@ -671,11 +728,17 @@ public class HSQLDbDAO implements IUserDAO {
 
 				ContactBean cBean = new ContactBean(sl_no , name, emails, phNums, tags, gender, dob, created_date);
 				al.add(cBean);
-
+				
 			}
+			con.commit();
 			
 		} catch (Exception e) {
 			
+			try {
+				con.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 			e.printStackTrace();
 	
 		} finally {

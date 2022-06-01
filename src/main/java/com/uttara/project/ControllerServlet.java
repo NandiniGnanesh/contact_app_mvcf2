@@ -290,6 +290,7 @@ public class ControllerServlet extends HttpServlet {
 			System.out.println("name to edit = " +nameToEdit);
 			
 			List<ContactBean> editBeanList = model.getContacts(nameToEdit , null);
+			System.out.println("editBeanList = " +editBeanList);
 			
 			//forward to ListEditContacts.jsp
 			request.setAttribute("editBeanList", editBeanList);
@@ -338,6 +339,7 @@ public class ControllerServlet extends HttpServlet {
 		System.out.println("in uri.contains(/updateContact.do)");
 		
 		ContactBean contactBean = (ContactBean)request.getAttribute("updateContact");
+		System.out.println("in updateContact.do => contactBean = " +contactBean);
 		String message2 = model.updateContact(contactBean);
 		
 		if( message2.equals(Constants.SUCCESS) ) {

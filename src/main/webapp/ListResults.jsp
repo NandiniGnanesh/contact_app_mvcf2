@@ -40,6 +40,8 @@
    				 </c:forEach>
 </table>
 	</div>
-	
+	<p align="center">
+		<a style="text-align:center" href = "Menu.jsp">Click here to go back to menu</a>
+	</p>
 </body>
 </html>

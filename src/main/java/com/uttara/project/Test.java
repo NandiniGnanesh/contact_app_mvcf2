@@ -51,3 +51,13 @@ public class Test {
  */
 
 }
+
+//con.setAutoCommit(false);
+
+//try {
+//	con.rollback();
+//} catch (SQLException e1) {
+//	e1.printStackTrace();
+//}
+
+//con.commit();
